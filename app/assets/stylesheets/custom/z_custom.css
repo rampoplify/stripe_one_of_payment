@@ -530,3 +530,12 @@ label.error {
     right: 0;
     padding-top: 0px
 }
+.w-25 {
+  width: 25%;
+}
+.w-50 {
+  width: 50%;
+}
+.p-r-20 {
+  padding-right: 20px;
+}

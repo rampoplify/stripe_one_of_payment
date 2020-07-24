@@ -203,6 +203,9 @@ button:active {
 .m-t-25 {
   margin-top: 25px;
 }
+.select_card {
+  cursor: pointer;
+}
 </style>
 
 <div class="payment_process" >
@@ -252,7 +255,7 @@ button:active {
   </div>
   <hr />
   
-  <div class="card_form" style="display: none;">
+  <div class="card_form row" style="display: none;">
     <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
       <% if @cards.present? %>
       <div class="header text-center">
@@ -264,11 +267,10 @@ button:active {
         <% @cards.each do |card| %>
         <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12 height-50 card_form m-t-b-10">
           <div class="existing_card">
-             <h6 class="card_text">
-                <%= card.card_type %> 
-                <%= card.last_4 %> 
-                <%= card.exp_month %>/ 
-                <span><%= card.exp_year %></span>
+             <h6 class="card_text d-flex select_card" id='<%= card.card_number%>'>
+                <span class="w-25"><%= card.card_type %></span> 
+                <span class="w-50 text-center">************<%= card.last_4 %></span> 
+                <span class="w-25 text-right p-r-20"><%= card.exp_month %>/<%= card.exp_year %></span>
               </h6>
           </div>
         </div>
@@ -276,7 +278,7 @@ button:active {
       </div>
       <% end %>
     </div>
-    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6 new_cards">
       <div class="header text-center">
         <h3>
           <span>Pay with new card</span>
@@ -285,7 +287,7 @@ button:active {
       <div class="card_form m-t-25">
       <form action="/users/pay_now" method="GET">
       <input type="hidden" name="payment_intent" id="hidden_payment_intent" />
-      <input type="hidden" name="token" />
+      <input type="hidden" name="token" id="stripe_token"/>
       <div class="group">
         <label class="height-50">
           <span>Card number</span>
@@ -429,5 +431,15 @@ document.querySelector('form').addEventListener('submit', function(e) {
         amount: $("input[name='payment']:checked").val()
       }
     })
+  })
+  $('.select_card').on('click', function(){
+    var form = $('form')
+    $('#stripe_token').attr('value', $(this).attr('id'));
+    $('#stripe_token').attr('name', 'card_id');
+    $('.new_cards').css('pointer-events', 'none')
+    form.submit();
+  })
+  $('.submit_btn').on('click', function(){
+    $('.existing_card').css('pointer-events', 'none')
   })
 </script>
