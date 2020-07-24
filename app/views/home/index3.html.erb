@@ -1,0 +1,433 @@
+<!-- <script src="https://js.stripe.com/v2/"></script> -->
+<script src="https://js.stripe.com/v3/"></script>
+<style type="text/css">
+.payment_process {
+  min-height: 700px;
+  padding: 10px;
+  background: linear-gradient(50deg, #f3c680, #a1e3e2);
+}
+
+.height-50 {
+    height: 50px;
+    padding-top: 5px;
+}
+
+/*--------------------
+Buttons
+--------------------*/
+
+.btn::after {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  -webkit-transition: all .2s ease-in-out;
+  transition: all .2s ease-in-out;
+  box-shadow: inset 0 3px 0 rgba(0, 0, 0, 0), 0 3px 3px rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+}
+.btn:hover::after {
+  background: rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 3px 0 rgba(0, 0, 0, 0.2);
+}
+
+.form button {
+  width: 100%;
+  outline: none !important;
+  background: -webkit-gradient(linear, left top, left bottom, from(#49a09b), to(#3d8291));
+  background: linear-gradient(180deg, #49a09b, #3d8291);
+  text-transform: uppercase;
+  font-weight: bold;
+  border: none;
+  box-shadow: none;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  /*margin-top: 90px;*/
+}
+.form button .fa {
+  margin-right: 6px;
+}
+
+
+.error {
+  position: absolute;
+  font-size: 12px;
+  line-height: 0;
+  color: red;
+  letter-spacing: 1px;
+  display: none;
+}
+
+
+form {
+  width: 480px;
+  margin: 10px 0;
+}
+
+.group {
+  background: white;
+  box-shadow: 0 7px 14px 0 rgba(49, 49, 93, 0.10), 0 3px 6px 0 rgba(0, 0, 0, 0.08);
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+label {
+  position: relative;
+  color: #8898AA;
+  font-weight: 300;
+  height: 40px;
+  line-height: 40px;
+  margin-left: 20px;
+  display: flex;
+  flex-direction: row;
+}
+
+.group label:not(:last-child) {
+  border-bottom: 1px solid #F0F5FA;
+}
+
+label > span {
+  width: 120px;
+  text-align: right;
+  margin-right: 30px;
+}
+
+.field {
+  background: transparent;
+  font-weight: 300;
+  border: 0;
+  color: #31325F;
+  outline: none;
+  flex: 1;
+  padding-right: 10px;
+  padding-left: 10px;
+  cursor: text;
+}
+
+.field::-webkit-input-placeholder {
+  color: #CFD7E0;
+}
+
+.field::-moz-placeholder {
+  color: #CFD7E0;
+}
+
+button {
+  float: left;
+  display: block;
+  background: #666EE8;
+  color: white;
+  box-shadow: 0 7px 14px 0 rgba(49, 49, 93, 0.10), 0 3px 6px 0 rgba(0, 0, 0, 0.08);
+  border-radius: 4px;
+  border: 0;
+  margin-top: 20px;
+  font-size: 15px;
+  font-weight: 400;
+  width: 100%;
+  height: 40px;
+  line-height: 38px;
+  outline: none;
+}
+
+button:focus {
+  background: #555ABF;
+}
+
+button:active {
+  background: #43458B;
+}
+
+.outcome {
+  float: left;
+  width: 100%;
+  padding-top: 8px;
+  min-height: 24px;
+  text-align: center;
+}
+
+.success,
+.error {
+  display: none;
+  font-size: 13px;
+}
+
+.success.visible,
+.error.visible {
+  display: inline;
+}
+
+.error {
+  color: #E4584C;
+  padding-top: 15px;
+  transform: translate(-50%);
+}
+
+.success {
+  color: #666EE8;
+}
+
+.success .token {
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.card_form {
+  display: flex;
+  justify-content: center;
+}
+.proceed_btn {
+  display: none;
+}
+.button_align {
+  margin-left: 50%;
+  transform: translate(-47%);
+}
+.existing_card {
+  height: inherit;
+  margin: 10px;
+  background-color: white;
+  width: 480px;
+  border-radius: 5px;
+}
+.m-t-b-10 {
+  margin: 10px 0;
+}
+.card_text {
+    line-height: 50px;
+    color: #8898AA;
+    font-weight: 300;
+    padding-left: 20px;
+}
+.m-t-25 {
+  margin-top: 25px;
+}
+</style>
+
+<div class="payment_process" >
+  <div class="payment-method row">
+    <div class="col-sm-4 col-md-4 col-xs-12 col-lg-4">
+      <label for="card" class="method card">
+        <div class="card-logos">
+          <img src="https://designmodo.com/demo/checkout-panel/img/visa_logo.png"/>
+          <img src="https://designmodo.com/demo/checkout-panel/img/mastercard_logo.png"/>
+        </div>
+
+        <div class="radio-input">
+          <input id="card-20" type="radio" name="payment" class="radio_buttons" value="20">
+          Pay $20 with card
+        </div>
+      </label>
+    </div>
+    <div class=" col-sm-4 col-md-4 col-xs-12 col-lg-4">
+      <label for="card" class="method card">
+        <div class="card-logos">
+          <img src="https://designmodo.com/demo/checkout-panel/img/visa_logo.png"/>
+          <img src="https://designmodo.com/demo/checkout-panel/img/mastercard_logo.png"/>
+        </div>
+
+        <div class="radio-input">
+          <input id="card-30" type="radio" name="payment" class="radio_buttons" value="30">
+          Pay $30 with card
+        </div>
+      </label>
+    </div>
+    <div class=" col-sm-4 col-md-4 col-xs-12 col-lg-4">
+      <label for="card" class="method card">
+        <div class="card-logos">
+          <img src="https://designmodo.com/demo/checkout-panel/img/visa_logo.png"/>
+          <img src="https://designmodo.com/demo/checkout-panel/img/mastercard_logo.png"/>
+        </div>
+
+        <div class="radio-input">
+          <input id="card-40" type="radio" name="payment" class="radio_buttons" value="40">
+          Pay $40 with card
+        </div>
+      </label>
+    </div>
+    <div class="col-sm-4 col-md-4 col-xs-12 col-lg-4 offset-sm-4 offset-md-4 offset-lg-4 proceed_btn button_align">
+      <button class="create_payment_intent">Proceed</button>
+    </div>
+  </div>
+  <hr />
+  
+  <div class="card_form" style="display: none;">
+    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+      <% if @cards.present? %>
+      <div class="header text-center">
+        <h3>
+          <span>Pay with existing cards</span>
+        </h3>
+      </div>
+      <div class="card_form row">
+        <% @cards.each do |card| %>
+        <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12 height-50 card_form m-t-b-10">
+          <div class="existing_card">
+             <h6 class="card_text">
+                <%= card.card_type %> 
+                <%= card.last_4 %> 
+                <%= card.exp_month %>/ 
+                <span><%= card.exp_year %></span>
+              </h6>
+          </div>
+        </div>
+        <% end %>
+      </div>
+      <% end %>
+    </div>
+    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+      <div class="header text-center">
+        <h3>
+          <span>Pay with new card</span>
+        </h3>
+      </div>
+      <div class="card_form m-t-25">
+      <form action="/users/pay_now" method="GET">
+      <input type="hidden" name="payment_intent" id="hidden_payment_intent" />
+      <input type="hidden" name="token" />
+      <div class="group">
+        <label class="height-50">
+          <span>Card number</span>
+          <div id="card-number-element" class="field"></div>
+        </label>
+        <label>
+          <span>Expiry date</span>
+          <div id="card-expiry-element" class="field"></div>
+        </label>
+        <label>
+          <span>CVC</span>
+          <div id="card-cvc-element" class="field"></div>
+        </label>
+        <label>
+          <span>Postal code</span>
+          <input id="postal-code" name="postal_code" class="field" placeholder="90210" />
+        </label>
+      </div>
+      <button class="submit_btn" type="submit">Pay</button>
+      <div class="outcome">
+        <div class="error"></div>
+<!--         <div class="success">
+          Success! Your Stripe token is <span class="token"></span>
+        </div> -->
+      </div>
+    </form>
+    </div>
+    </div>
+  </div>
+</div>
+
+
+<script type="text/javascript">
+  // Custom fields
+var stripe = Stripe('pk_test_89Htth7vCl9UauQfC2i2KBgw00L63svyYN');
+var elements = stripe.elements();
+
+var style = {
+  base: {
+    iconColor: '#666EE8',
+    color: '#31325F',
+    lineHeight: '40px',
+    fontWeight: 300,
+    fontFamily: 'Helvetica Neue',
+    fontSize: '15px',
+
+    '::placeholder': {
+      color: '#CFD7E0',
+    },
+  },
+};
+
+var cardNumberElement = elements.create('cardNumber', {
+  style: style
+});
+cardNumberElement.mount('#card-number-element');
+
+var cardExpiryElement = elements.create('cardExpiry', {
+  style: style
+});
+cardExpiryElement.mount('#card-expiry-element');
+
+var cardCvcElement = elements.create('cardCvc', {
+  style: style
+});
+cardCvcElement.mount('#card-cvc-element');
+
+
+function setOutcome(result) {
+  var successElement = document.querySelector('.success');
+  var errorElement = document.querySelector('.error');
+  successElement.classList.remove('visible');
+  errorElement.classList.remove('visible');
+
+  if (result.token) {
+    // In this example, we're simply displaying the token
+    successElement.querySelector('.token').textContent = result.token.id;
+    successElement.classList.add('visible');
+
+    // In a real integration, you'd submit the form with the token to your backend server
+
+    var form = document.querySelector('form');
+    form.querySelector('input[name="token"]').setAttribute('value', result.token.id);
+    form.submit();
+
+  } else if (result.error) {
+    errorElement.textContent = result.error.message;
+    errorElement.classList.add('visible');
+  }
+}
+
+cardNumberElement.on('change', function(event) {
+  setOutcome(event);
+});
+
+cardExpiryElement.on('change', function(event) {
+  setOutcome(event);
+});
+
+cardCvcElement.on('change', function(event) {
+  setOutcome(event);
+});
+
+document.querySelector('form').addEventListener('submit', function(e) {
+  e.preventDefault();
+  var options = {
+    address_zip: document.getElementById('postal-code').value,
+  };
+  stripe.createToken(cardNumberElement, options).then(setOutcome);
+});
+
+ 
+  $('.method').on('click', function() {
+    if($('#hidden_payment_intent').val() == '' || $('#hidden_payment_intent').val() == undefined){
+      $('.method').removeClass('blue-border');
+      $(this).addClass('blue-border');
+      $(this).find('.radio-input input').prop("checked", true);
+      $('.submit_btn').html('Pay $' + $(this).find('.radio-input input').val())
+      $('.proceed_btn').removeClass('proceed_btn')
+    }
+  });
+ 
+  var $cardInput = $('.input-fields input');
+ 
+  $('.next-btn').on('click', function(e) {
+    $cardInput.removeClass('warning');
+    $cardInput.each(function() {    
+      var $this = $(this);
+      if (!$this.val()) {
+        $this.addClass('warning');
+      }
+    })
+  });
+
+  $('.create_payment_intent').on('click', function(){
+    $('.payment-method').css({'opacity': '.3', 'pointer-events': 'none'})
+    $.ajax({
+      url: '<%= create_payment_intent_users_path %>',
+      method: 'GET',
+      data: {
+        amount: $("input[name='payment']:checked").val()
+      }
+    })
+  })
+</script>
