@@ -1,4 +1,5 @@
 class UsersController < ApplicationController
+	before_action :authenticate_user! 
 
 	def create_payment_intent
 		if params[:amount].present?
