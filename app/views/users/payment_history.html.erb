@@ -1,0 +1,23 @@
+<div class="payment_process">
+	<% if @payment_history.present? %>
+	<table class="table">
+		<thead class="thead-dark">
+			<tr>
+				<th scope="col">Sr. No.</th>
+				<th scope="col">Amount</th>
+				<th scope="col">Payment_intent</th>
+			</tr>
+		</thead>
+		<tbody>
+			<% @payment_history.each do |history| %>
+			<tr>
+				<th scope="row"><%= history.id %></th>
+				<td><%= history.amount %></td>
+				<td><%= history.payment_intent %></td>
+			</tr>
+			<% end %>
+		</tbody>
+	</table>
+	<% end %>
+</div>
+

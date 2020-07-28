@@ -539,3 +539,8 @@ label.error {
 .p-r-20 {
   padding-right: 20px;
 }
+.payment_process {
+  min-height: 100%;
+  padding: 10px;
+  background: linear-gradient(50deg, #f3c680, #a1e3e2);
+}
