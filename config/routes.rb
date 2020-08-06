@@ -7,14 +7,24 @@ Rails.application.routes.draw do
 
   resources :users, only: [], path: 'users' do
   	collection do
-  		get 	'/pay_now' => 					'users#pay_now'
-  		get 	'create_payment_intent' =>		'users#create_payment_intent'
+  		get 	'/pay_now'               => 					'users#pay_now'
+  		get 	'create_payment_intent'  =>		'users#create_payment_intent'
   	end
   	member do 
-  		get 	'payment_history'		=> 		'users#payment_history'
-  		get 	'payment_confirmation'	=> 		'users#payment_confirmation'
-  		get 	'save_card'				=> 		'users#save_card'
+  		get 	'payment_history'        => 		'users#payment_history'
+  		get 	'payment_confirmation'   => 		'users#payment_confirmation'
+  		get 	'save_card'				       => 		'users#save_card'
   	end
+  end
+
+  resources :subscriptions, path: 'subscriptions' do 
+    collection do 
+      post  'create_subscription'   => 'subscriptions#create_subscription'
+      post  'retry_invoice'         => 'subscriptions#retry_invoice'
+
+      get   'plans'                 => 'subscriptions#plans'
+      get   'active'   => 'subscriptions#active_subscription'
+    end
   end
 
   post '/webhook/payment_attempt' 		=> 		'users#payment_attempt'

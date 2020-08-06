@@ -17,7 +17,7 @@
     <%= yield %>
   </body>
   <% flash.each do |type, msg| %>
-    <div class="alert alert-info">
+    <div class="alert alert-info" style="position: absolute;">
       <%= msg %>
     </div>
   <% end %>

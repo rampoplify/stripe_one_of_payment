@@ -1,0 +1,507 @@
+<style type="text/css">
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+label {
+  position: relative;
+  color: #8898AA;
+  font-weight: 300;
+  height: 40px;
+  line-height: 40px;
+  margin-left: 20px;
+  display: flex;
+  flex-direction: row;
+}
+.group label:not(:last-child) {
+  border-bottom: 1px solid #F0F5FA;
+}
+
+label > span {
+  width: 120px;
+  text-align: right;
+  margin-right: 30px;
+}
+
+.field {
+  background: transparent;
+  font-weight: 300;
+  border: 0;
+  color: #31325F;
+  outline: none;
+  flex: 1;
+  padding-right: 10px;
+  padding-left: 10px;
+  cursor: text;
+}
+
+.field::-webkit-input-placeholder {
+  color: #CFD7E0;
+}
+
+.field::-moz-placeholder {
+  color: #CFD7E0;
+}
+
+.btn {
+  display: block;
+  background: #bded7d;
+  color: white;
+  text-decoration: none;
+  margin: 20px 0;
+  /*padding: 15px 15px;*/
+  border-radius: 5px;
+  position: relative;
+}
+.btn::after {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  -webkit-transition: all .2s ease-in-out;
+  transition: all .2s ease-in-out;
+  box-shadow: inset 0 3px 0 rgba(0, 0, 0, 0), 0 3px 3px rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+}
+.btn:hover::after {
+  background: rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 3px 0 rgba(0, 0, 0, 0.2);
+}
+.form button {
+  width: 100%;
+  outline: none !important;
+  background: -webkit-gradient(linear, left top, left bottom, from(#49a09b), to(#3d8291));
+  background: linear-gradient(180deg, #49a09b, #3d8291);
+  text-transform: uppercase;
+  font-weight: bold;
+  border: none;
+  box-shadow: none;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  /*margin-top: 90px;*/
+}
+.form button .fa {
+  margin-right: 6px;
+}
+.checkout {
+  margin: 150px auto 30px;
+  position: relative;
+  width: 460px;
+  background: white;
+  border-radius: 15px;
+  padding: 160px 45px 30px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+.error {
+  position: absolute;
+  bottom: 25px;
+  font-size: 12px;
+  line-height: 0;
+  color: red;
+  letter-spacing: 1px;
+  display: none;
+}
+.success,
+.error {
+  display: none;
+  font-size: 13px;
+}
+
+.success.visible,
+.error.visible {
+  display: inline;
+}
+
+.error {
+  color: #E4584C;
+  padding-top: 15px;
+  /*transform: translate(-50%);*/
+}
+
+.success {
+  color: #666EE8;
+}
+
+.success .token {
+  font-weight: 500;
+  font-size: 13px;
+}
+</style>
+
+<div class="payment_process">
+  <div class="checkout">
+    <div class="credit-card-box">
+      <div class="flip">
+        <div class="front">
+          <div class="chip"></div>
+          <div class="logo">
+            <svg version="1.1" id="visa" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                 width="47.834px" height="47.834px" viewBox="0 0 47.834 47.834" style="enable-background:new 0 0 47.834 47.834;">
+              <g>
+                <g>
+                  <path d="M44.688,16.814h-3.004c-0.933,0-1.627,0.254-2.037,1.184l-5.773,13.074h4.083c0,0,0.666-1.758,0.817-2.143
+                           c0.447,0,4.414,0.006,4.979,0.006c0.116,0.498,0.474,2.137,0.474,2.137h3.607L44.688,16.814z M39.893,26.01
+                           c0.32-0.819,1.549-3.987,1.549-3.987c-0.021,0.039,0.317-0.825,0.518-1.362l0.262,1.23c0,0,0.745,3.406,0.901,4.119H39.893z
+                           M34.146,26.404c-0.028,2.963-2.684,4.875-6.771,4.875c-1.743-0.018-3.422-0.361-4.332-0.76l0.547-3.193l0.501,0.228
+                           c1.277,0.532,2.104,0.747,3.661,0.747c1.117,0,2.313-0.438,2.325-1.393c0.007-0.625-0.501-1.07-2.016-1.77
+                           c-1.476-0.683-3.43-1.827-3.405-3.876c0.021-2.773,2.729-4.708,6.571-4.708c1.506,0,2.713,0.31,3.483,0.599l-0.526,3.092
+                           l-0.351-0.165c-0.716-0.288-1.638-0.566-2.91-0.546c-1.522,0-2.228,0.634-2.228,1.227c-0.008,0.668,0.824,1.108,2.184,1.77
+                           C33.126,23.546,34.163,24.783,34.146,26.404z M0,16.962l0.05-0.286h6.028c0.813,0.031,1.468,0.29,1.694,1.159l1.311,6.304
+                           C7.795,20.842,4.691,18.099,0,16.962z M17.581,16.812l-6.123,14.239l-4.114,0.007L3.862,19.161
+                           c2.503,1.602,4.635,4.144,5.386,5.914l0.406,1.469l3.808-9.729L17.581,16.812L17.581,16.812z M19.153,16.8h3.89L20.61,31.066
+                           h-3.888L19.153,16.8z"/>
+                </g>
+              </g>
+            </svg>
+          </div>
+          <div class="number"></div>
+          <div class="card-holder">
+            <label>Card holder</label>
+            <div></div>
+          </div>
+          <div class="card-expiration-date">
+            <label>Expires</label>
+            <div></div>
+          </div>
+        </div>
+        <div class="back">
+          <div class="strip"></div>
+          <div class="logo">
+            <svg version="1.1" id="visa" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                 width="47.834px" height="47.834px" viewBox="0 0 47.834 47.834" style="enable-background:new 0 0 47.834 47.834;">
+              <g>
+                <g>
+                  <path d="M44.688,16.814h-3.004c-0.933,0-1.627,0.254-2.037,1.184l-5.773,13.074h4.083c0,0,0.666-1.758,0.817-2.143
+                           c0.447,0,4.414,0.006,4.979,0.006c0.116,0.498,0.474,2.137,0.474,2.137h3.607L44.688,16.814z M39.893,26.01
+                           c0.32-0.819,1.549-3.987,1.549-3.987c-0.021,0.039,0.317-0.825,0.518-1.362l0.262,1.23c0,0,0.745,3.406,0.901,4.119H39.893z
+                           M34.146,26.404c-0.028,2.963-2.684,4.875-6.771,4.875c-1.743-0.018-3.422-0.361-4.332-0.76l0.547-3.193l0.501,0.228
+                           c1.277,0.532,2.104,0.747,3.661,0.747c1.117,0,2.313-0.438,2.325-1.393c0.007-0.625-0.501-1.07-2.016-1.77
+                           c-1.476-0.683-3.43-1.827-3.405-3.876c0.021-2.773,2.729-4.708,6.571-4.708c1.506,0,2.713,0.31,3.483,0.599l-0.526,3.092
+                           l-0.351-0.165c-0.716-0.288-1.638-0.566-2.91-0.546c-1.522,0-2.228,0.634-2.228,1.227c-0.008,0.668,0.824,1.108,2.184,1.77
+                           C33.126,23.546,34.163,24.783,34.146,26.404z M0,16.962l0.05-0.286h6.028c0.813,0.031,1.468,0.29,1.694,1.159l1.311,6.304
+                           C7.795,20.842,4.691,18.099,0,16.962z M17.581,16.812l-6.123,14.239l-4.114,0.007L3.862,19.161
+                           c2.503,1.602,4.635,4.144,5.386,5.914l0.406,1.469l3.808-9.729L17.581,16.812L17.581,16.812z M19.153,16.8h3.89L20.61,31.066
+                           h-3.888L19.153,16.8z"/>
+                </g>
+              </g>
+            </svg>
+
+          </div>
+          <div class="ccv">
+            <label>CCV</label>
+            <div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card_form m-t-25">
+      <form action="/users/pay_now" method="GET">
+      <input type="hidden" name="payment_intent" id="hidden_payment_intent" />
+      <input type="hidden" name="payment_intent_client_secret" id="payment_intent_client_secret" />
+      <input type="hidden" name="token" id="stripe_token"/>
+      <div class="group">
+      	<label>
+          <span>Full Name</span>
+          <input id="full_name" name="full_name" class="field InputElement" placeholder="Ram Nayan" />
+        </label>
+        <label class="height-50">
+          <span>Card number</span>
+          <div id="card-number-element" class="field"></div>
+        </label>
+        <label>
+          <span>Expiry date</span>
+          <div id="card-expiry-element" class="field"></div>
+        </label>
+        <label>
+          <span>CVC</span>
+          <div id="card-cvc-element" class="field"></div>
+        </label>
+        <label>
+          <span>Postal code</span>
+          <input id="postal-code" name="postal_code" class="field InputElement" placeholder="90210" />
+        </label>
+      </div>
+      <div id="card-element-errors" class="text-gray-700 text-base mt-2" role="alert" ></div>
+      <div class="outcome">
+        <div class="error" style="display: none;"></div>
+        <div class="success">
+          Success! Your Stripe token is <span class="token"></span>
+        </div>
+      </div>
+      <button class="submit_btn" type="submit">Pay</button>
+    </form>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+var stripe = Stripe('pk_test_89Htth7vCl9UauQfC2i2KBgw00L63svyYN');
+var elements = stripe.elements();
+
+var style = {
+  base: {
+    iconColor: '#666EE8',
+    color: '#31325F',
+    lineHeight: '40px',
+    fontWeight: 300,
+    fontFamily: 'Helvetica Neue',
+    fontSize: '15px',
+
+    '::placeholder': {
+      color: '#CFD7E0',
+    },
+  },
+};
+
+var cardNumberElement = elements.create('cardNumber', {
+  style: style
+});
+cardNumberElement.mount('#card-number-element');
+
+var cardExpiryElement = elements.create('cardExpiry', {
+  style: style
+});
+cardExpiryElement.mount('#card-expiry-element');
+
+var cardCvcElement = elements.create('cardCvc', {
+  style: style
+});
+cardCvcElement.mount('#card-cvc-element');
+
+
+function setOutcome(result) {
+  var successElement = document.querySelector('.success');
+  var errorElement = document.querySelector('.error');
+  successElement.classList.remove('visible');
+  errorElement.classList.remove('visible');
+
+  if (result.token) {
+    successElement.querySelector('.token').textContent = result.token.id;
+    // successElement.classList.add('visible');
+    var form = document.querySelector('form');
+    form.querySelector('input[name="token"]').setAttribute('value', result.token.id);
+    // form.submit();
+  } else if (result.error) {
+    errorElement.textContent = result.error.message;
+    errorElement.classList.add('visible');
+  }
+  return false;
+}
+
+cardNumberElement.on('change', function(event) {
+  setOutcome(event);
+});
+
+cardExpiryElement.on('change', function(event) {
+  setOutcome(event);
+});
+
+cardCvcElement.on('change', function(event) {
+  setOutcome(event);
+});
+
+document.querySelector('form').addEventListener('submit', function(e) {
+  e.preventDefault();
+  var options = {
+    address_zip: document.getElementById('postal-code').value,
+  };
+  // stripe.createToken(cardNumberElement, options).then(setOutcome);
+
+  const latestInvoicePaymentIntentStatus = localStorage.getItem('latestInvoicePaymentIntentStatus');
+  if(latestInvoicePaymentIntentStatus === 'requires_payment_method') {
+    const invoiceId = localStorage.getItem('latestInvoiceId');
+    createPaymentMethod({ isPaymentRetry: true, invoiceId: invoiceId, cardElement: cardNumberElement })
+  }else{
+    createPaymentMethod({ isPaymentRetry: false, invoiceId: '', cardElement: cardNumberElement });
+  }
+});
+
+function createPaymentMethod({ isPaymentRetry, invoiceId, cardElement }) {
+  let billingName = $('#full_name').val()
+	stripe.createPaymentMethod({
+		type: 'card',
+		card: cardElement,
+		billing_details: {
+			name: billingName,
+		},
+	})
+    .then((result) => {
+      if (result.error) {
+        displayError(result);
+      } else {
+        if (isPaymentRetry) {
+          retryInvoiceWithNewPaymentMethod({
+            paymentMethodId: result.paymentMethod.id,
+            invoiceId: invoiceId,
+            priceId: '<%= params[:id]%>',
+          });
+        } else {
+          createSubscription({
+            paymentMethodId: result.paymentMethod.id
+          });
+        }
+      }
+    });
+}
+function displayError(event) {
+  let displayError = document.getElementById('card-element-errors');
+  if (event.error) {
+    displayError.style.textAlign = 'center'
+    displayError.style.color = 'red'
+    displayError.textContent = event.error.message;
+  } else {
+    displayError.textContent = '';
+  }
+}
+
+function createSubscription({paymentMethodId, priceId }) {
+  return (
+  	$.ajax({
+  		url: '/subscriptions/create_subscription',
+  		method: 'post',
+  		data: {
+	      payment_method: paymentMethodId,
+      	product: 'prod_HkPwPXN8ZYJufw',
+        price_id: '<%= params[:id]%>'
+  		}
+  	})
+  .then((response) => {
+    return response;
+  })
+  .then((result) => {
+    if (result.error) {
+      throw result;
+    }
+    return result;
+  })
+  .then((result) => {
+    return {subscription: result.subscription, paymentMethodId: result.payment_intent.payment_method, paymentIntent: result.payment_intent};
+  })
+  .then(handlePaymentThatRequiresCustomerAction)
+  .then(handleRequiresPaymentMethod)
+  .then(onSubscriptionComplete)
+  .catch((error) => {
+    displayError(error);
+  })
+)}
+
+function handlePaymentThatRequiresCustomerAction({subscription, paymentIntent, isRetry, invoice, priceId, paymentMethodId}) {
+  
+  if (subscription && subscription.status === 'active') {
+    return { subscription, priceId, paymentMethodId };
+  }
+  if ((paymentIntent && paymentIntent.status === 'requires_action') || (isRetry === true && paymentIntent.status ==='requires_payment_method') ) {
+    $('.submit_btn').prop('disable', true);
+    return stripe
+    .confirmCardPayment(paymentIntent.client_secret, {
+      payment_method: paymentMethodId,
+    })
+    .then((result) => {
+      if (result.error) {
+        return {
+          subscription, 
+          paymentMethodId: result.error.payment_method.id, 
+          priceId: '<%= params[:id]%>', 
+          paymentIntent: result.error.payment_intent
+        }
+      } else {
+        if (result.paymentIntent.status === 'succeeded') {
+          return {
+            subscription: subscription,
+            priceId: '<%= params[:id]%>',
+            paymentMethodId: paymentMethodId,
+          };
+        }
+      }
+    });
+  } 
+  else {
+    return { subscription, priceId, paymentMethodId };
+  }
+}
+
+
+function retryInvoiceWithNewPaymentMethod({ paymentMethodId, invoiceId, priceId, }) {
+  return (
+    $.ajax({
+      method: 'post',
+      url: '/subscriptions/retry_invoice',
+      data: {
+        payment_method: paymentMethodId,
+        invoice_id: invoiceId
+      }
+    })
+    .then((response) => {
+      return response;
+    })
+    .then((result) => {
+      if (result.error) {
+        throw result;
+      }
+      return result;
+    })
+    .then((result) => {
+      return {
+        invoice: result.invoice,
+        subscription: result.invoice.subscription,
+        paymentIntent: result.invoice.payment_intent,
+        paymentMethodId: paymentMethodId,
+        priceId: priceId,
+        isRetry: true,
+      };
+    })
+    .then(handlePaymentThatRequiresCustomerAction)
+    .then(handleRequiresPaymentMethod)
+    .then(onSubscriptionComplete)
+    .catch((error) => {
+      displayError(error);
+    })
+  );
+}
+
+function handleRequiresPaymentMethod({ subscription, paymentMethodId, priceId, paymentIntent }) {
+  if (subscription && subscription.status === 'active') {
+    return { subscription, priceId, paymentMethodId };
+  } else if ( paymentIntent && paymentIntent.status ==='requires_payment_method' ) {
+    localStorage.setItem('latestInvoiceId', subscription.latest_invoice);
+    localStorage.setItem('latestInvoicePaymentIntentStatus', paymentIntent.status );
+    throw { error: { message: 'Your card was declined.' } };
+  } else {
+    return { subscription, priceId, paymentMethodId };
+  }
+}
+
+function onSubscriptionComplete(result) {
+  console.log(result);
+  clearCache();
+  location.reload();
+  alert('Subscription Created successfully.')
+}
+
+function clearCache() {
+  localStorage.clear();
+}
+
+
+  function getCreditCardType(accountNumber) {
+    if (/^5[1-5]/.test(accountNumber)) {
+      result = 'mastercard';
+    } else if (/^4/.test(accountNumber)) {
+      result = 'visa';
+    } else if ( /^(5018|5020|5038|6304|6759|676[1-3])/.test(accountNumber)) {
+      result = 'maestro';
+    } else {
+      result = 'unknown'
+    }
+    return result;
+  }
+
+  $('#card-number').change(function(){
+    console.log(getCreditCardType($(this).val()));
+  })
+
+</script>

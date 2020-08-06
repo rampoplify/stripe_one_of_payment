@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_07_24_063020) do
+ActiveRecord::Schema.define(version: 2020_07_31_104242) do
 
   create_table "payment_details", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.bigint "user_id", null: false
@@ -19,6 +19,28 @@ ActiveRecord::Schema.define(version: 2020_07_24_063020) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["user_id"], name: "index_payment_details_on_user_id"
+  end
+
+  create_table "plans", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.integer "amount"
+    t.text "currency"
+    t.text "name"
+    t.text "description"
+    t.string "interval"
+    t.integer "interval_count"
+    t.bigint "product_id", null: false
+    t.text "stripe_prod_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["product_id"], name: "index_plans_on_product_id"
+  end
+
+  create_table "products", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.text "product_id"
+    t.text "name"
+    t.text "description"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "user_cards", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
@@ -51,5 +73,6 @@ ActiveRecord::Schema.define(version: 2020_07_24_063020) do
   end
 
   add_foreign_key "payment_details", "users"
+  add_foreign_key "plans", "products"
   add_foreign_key "user_cards", "users"
 end
