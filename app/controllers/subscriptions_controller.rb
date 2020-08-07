@@ -4,6 +4,7 @@ class SubscriptionsController < ApplicationController
 		
 	end
 	def show
+		@cards = current_user.user_cards.order(created_at: :desc)
 		customer = Stripe::Customer.retrieve(current_user.customer_id)
 		if customer.present? && customer.subscriptions.present? 
 			if customer.subscriptions.data.pluck(:plan).pluck(:id).include?(params[:id])

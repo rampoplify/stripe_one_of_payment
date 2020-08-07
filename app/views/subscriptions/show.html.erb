@@ -132,6 +132,30 @@ label > span {
 </style>
 
 <div class="payment_process">
+  <div class="row">
+    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6 p-4">
+      <% if @cards.present? %>
+      <div class="header text-center">
+        <h3>
+          <span>Pay with existing cards</span>
+        </h3>
+      </div>
+      <div class="card_form row">
+        <% @cards.each do |card| %>
+        <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12 height-50 card_form m-t-b-10">
+          <div class="existing_card">
+             <h6 class="card_text d-flex select_card" id='<%= card.card_number%>'>
+                <span class="w-25"><%= card.card_type %></span> 
+                <span class="w-50 text-center">************<%= card.last_4 %></span> 
+                <span class="w-25 text-right p-r-20"><%= card.exp_month %>/<%= card.exp_year %></span>
+              </h6>
+          </div>
+        </div>
+        <% end %>
+      </div>
+      <% end %>
+    </div>
+    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
   <div class="checkout">
     <div class="credit-card-box">
       <div class="flip">
@@ -237,6 +261,8 @@ label > span {
     </div>
   </div>
 </div>
+</div>
+</div>
 
 <script type="text/javascript">
 var stripe = Stripe('pk_test_89Htth7vCl9UauQfC2i2KBgw00L63svyYN');
@@ -319,6 +345,21 @@ document.querySelector('form').addEventListener('submit', function(e) {
     createPaymentMethod({ isPaymentRetry: false, invoiceId: '', cardElement: cardNumberElement });
   }
 });
+
+$('.select_card').on('click', function(){
+  const paymentMethodId = $(this).attr('id');
+  const latestInvoicePaymentIntentStatus = localStorage.getItem('latestInvoicePaymentIntentStatus');
+  if(latestInvoicePaymentIntentStatus === 'requires_payment_method') {
+    const invoiceId = localStorage.getItem('latestInvoiceId');
+      retryInvoiceWithNewPaymentMethod({
+        paymentMethodId: paymentMethodId,
+        invoiceId: invoiceId,
+        priceId: '<%= params[:id]%>',
+      });
+  }else{
+    createSubscription({paymentMethodId})
+  }
+})
 
 function createPaymentMethod({ isPaymentRetry, invoiceId, cardElement }) {
   let billingName = $('#full_name').val()
