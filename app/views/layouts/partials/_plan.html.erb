@@ -1,110 +1,35 @@
-<div class="payment_process">
-  <div class="container">
-    <% if @subscriptions.present? %>
-      <% @subscriptions.each do |subscription|%>
-        <% if subscription.plan.interval == 'month' && subscription.plan.interval_count == 1 %>
-          <% charge = 'Monthly'%>
-        <% elsif subscription.plan.interval == 'month' && subscription.plan.interval_count == 6 %>
-          <% charge =  'Per 6 Month'%> 
-        <% else %>
-          <% charge =  'Per year'%> 
-        <% end %>
-        <% if subscription.status != 'active'%>
-          <div class="message">
-            <h3>You have pending payment status </h3>
-          </div>
-        <% end %>
-        <div style="<% if subscription.status != 'active' %> opacity: 0.5; pointer-events: none; <% end %>">
-          <div>
-            <span>Current plan</span>
-            <span><%= subscription.plan.amount / 100 %> <%= charge %></span>
-          </div>
-          <div class="row">
-            <div class="col-md-4 col-sm-4 col-lg-4">
-              <button>
-                <%= link_to 'Cancel Plan', "/subscriptions/#{subscription.id}", method: :delete%>
-              </button>
+  <div class="row">
+    <%if @prices.present? %>
+      <% @prices.each do |price|%>
+        <div class="col-sm-4 col-md-4 col-xs-12 col-lg-4" style="<% if @current_plan.present? && price.id == @current_plan.id%>opacity: 0.3; pointer-events: none; <% end %>" >
+          <label for="card" class="method_card">
+            <% if price.recurring.interval == 'month' && price.recurring.interval_count == 1 %>
+              <% charge = 'Monthly'%>
+            <% elsif price.recurring.interval == 'month' && price.recurring.interval_count == 6 %>
+              <% charge =  'Per 6 Month'%> 
+            <% else %>
+              <% charge =  'Per year'%> 
+            <% end %>
+
+            <div class="radio-input">
+              <input id="<%= price.id%>" type="radio" name="subscription" class="radio_buttons" value="<%= price.id%>">
+              <ul>
+                <li>
+                  Amount : $ <%= price.unit_amount / 100 %> / <%= charge %>
+                </li>
+                <li>
+                  Charged <%= charge%> 
+               </li>
+               <li>
+                  Non-refundable
+               </li>
+             </ul>
             </div>
-            <div class="col-md-4 col-sm-4 col-lg-4">
-              <button>
-                <%= link_to 'Update plan', subscription_plans_path(subscription.id), method: :get%>
-              </button>
-            </div>
-            <div class="col-md-4 col-sm-4 col-lg-4">
-              <button>
-                <%= link_to 'View Next Invoice', subscription_plan_path(subscription.id, subscription.plan.id) %>
-              </button>
-            </div>
-          </div>
+          </label>
         </div>
-        <% if subscription.status != 'active'%>
-          <input type="hidden" name="invoice" id="invoice_id" value="<%= subscription.latest_invoice%>">
-          <div class="payment_method">
-            <form id="payment-form" >
-              <div class="col-sm-4 col-md-4 col-xs-12 col-lg-4 offset-sm-4 offset-md-4 offset-lg-4">
-                <label for="card-element">Card</label>
-                <div id="card-element"></div>
-              </div>
-              <div id="card-element-errors" class="text-gray-700 text-base mt-2" role="alert">
-                
-              </div>
-              <div>
-                <button id="submit-premium" type="submit" >Pay with new card</button>
-              </div>
-            </form>
-          </div>
-        <% end %>
       <% end %>
     <% end %>
-  </div>    
-</div>
-
-<script type="text/javascript">
-  var style = {
-    base: {
-      fontSize: '16px',
-      color: '#32325d',
-      fontFamily:
-        '-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
-      fontSmoothing: 'antialiased',
-      '::placeholder': {
-        color: '#a0aec0',
-      },
-    },
-  };
-  var stripe = Stripe('pk_test_89Htth7vCl9UauQfC2i2KBgw00L63svyYN');
-  var elements = stripe.elements();
-
-  card = elements.create('card', {style: style});
-  card.mount('#card-element');
-
-  document.querySelector('form').addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    const latestInvoicePaymentIntentStatus = localStorage.getItem('latestInvoicePaymentIntentStatus');
-    if(latestInvoicePaymentIntentStatus === 'requires_payment_method') {
-      const invoiceId = localStorage.getItem('latestInvoiceId');
-      createPaymentMethod({ isPaymentRetry: true, invoiceId: invoiceId, cardElement: card })
-    }else{
-      createPaymentMethod({ isPaymentRetry: false, invoiceId: '', cardElement: card });
-    }
-  });
-
-  $('.select_card').on('click', function(){
-    const paymentMethodId = $(this).attr('id');
-    const latestInvoicePaymentIntentStatus = localStorage.getItem('latestInvoicePaymentIntentStatus');
-    if(latestInvoicePaymentIntentStatus === 'requires_payment_method') {
-      const invoiceId = localStorage.getItem('latestInvoiceId');
-        retryInvoiceWithNewPaymentMethod({
-          paymentMethodId: paymentMethodId,
-          invoiceId: invoiceId,
-          priceId: $("input[name='subscription']:checked").val(),
-        });
-    }else{
-      createSubscription({paymentMethodId})
-    }
-  })
-</script>
+  </div>
 
 <script type="text/javascript">
 
@@ -113,15 +38,25 @@ function createPaymentMethod({ isPaymentRetry, invoiceId, cardElement }) {
   stripe.createPaymentMethod({
     type: 'card',
     card: cardElement,
+    billing_details: {
+      name: billingName,
+    },
   })
     .then((result) => {
       if (result.error) {
         displayError(result);
       } else {
-        retryInvoiceWithNewPaymentMethod({
-          paymentMethodId: result.paymentMethod.id,
-          invoiceId: $('#invoice_id').val(),
-        });
+        if (isPaymentRetry) {
+          retryInvoiceWithNewPaymentMethod({
+            paymentMethodId: result.paymentMethod.id,
+            invoiceId: invoiceId,
+            priceId: $("input[name='subscription']:checked").val(),
+          });
+        } else {
+          createSubscription({
+            paymentMethodId: result.paymentMethod.id
+          });
+        }
       }
     });
 }
@@ -255,11 +190,6 @@ function handleRequiresPaymentMethod({ subscription, paymentMethodId, priceId, p
     return { subscription, priceId, paymentMethodId };
   }
 }
-  function onSubscriptionComplete(result) {
-    clearCache();
-    location.reload();
-    alert('Payment successfully completed.')
-  }
 
 function clearCache() {
   localStorage.clear();

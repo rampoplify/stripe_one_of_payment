@@ -1,0 +1,228 @@
+<form id="payment-form" >
+	<div class="col-sm-4 col-md-4 col-xs-12 col-lg-4 offset-sm-4 offset-md-4 offset-lg-4">
+		<label for="card-element">Card</label>
+		<div id="card-element"></div>
+	</div>
+	<div id="card-element-errors" class="text-gray-700 text-base mt-2" role="alert">
+		
+	</div>
+	<div>
+		<button id="submit-premium" type="submit" >Subscribe</button>
+	</div>
+</form>
+<script type="text/javascript">
+	let style = {
+      base: {
+        fontSize: '16px',
+        color: '#32325d',
+        fontFamily:
+          '-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
+        fontSmoothing: 'antialiased',
+        '::placeholder': {
+          color: '#a0aec0',
+        },
+      },
+    };
+	var stripe = Stripe('pk_test_89Htth7vCl9UauQfC2i2KBgw00L63svyYN');
+	var elements = stripe.elements();
+
+	card = elements.create('card', {style: style});
+
+    card.mount('#card-element');
+
+
+
+
+document.querySelector('form').addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  const latestInvoicePaymentIntentStatus = localStorage.getItem('latestInvoicePaymentIntentStatus');
+  if(latestInvoicePaymentIntentStatus === 'requires_payment_method') {
+    const invoiceId = localStorage.getItem('latestInvoiceId');
+    createPaymentMethod({ isPaymentRetry: true, invoiceId: invoiceId, cardElement: card })
+  }else{
+    createPaymentMethod({ isPaymentRetry: false, invoiceId: '', cardElement: card });
+  }
+});
+
+$('.select_card').on('click', function(){
+  const paymentMethodId = $(this).attr('id');
+  const latestInvoicePaymentIntentStatus = localStorage.getItem('latestInvoicePaymentIntentStatus');
+  if(latestInvoicePaymentIntentStatus === 'requires_payment_method') {
+    const invoiceId = localStorage.getItem('latestInvoiceId');
+      retryInvoiceWithNewPaymentMethod({
+        paymentMethodId: paymentMethodId,
+        invoiceId: invoiceId,
+        priceId: '<%= params[:id]%>',
+      });
+  }else{
+    createSubscription({paymentMethodId})
+  }
+})
+
+function createPaymentMethod({ isPaymentRetry, invoiceId, cardElement }) {
+  let billingName = $('#full_name').val()
+	stripe.createPaymentMethod({
+		type: 'card',
+		card: cardElement,
+		billing_details: {
+			name: billingName,
+		},
+	})
+    .then((result) => {
+      if (result.error) {
+        displayError(result);
+      } else {
+        if (isPaymentRetry) {
+          retryInvoiceWithNewPaymentMethod({
+            paymentMethodId: result.paymentMethod.id,
+            invoiceId: invoiceId,
+            priceId: '<%= params[:id]%>',
+          });
+        } else {
+          createSubscription({
+            paymentMethodId: result.paymentMethod.id
+          });
+        }
+      }
+    });
+}
+function displayError(event) {
+  let displayError = document.getElementById('card-element-errors');
+  if (event.error) {
+    displayError.style.textAlign = 'center'
+    displayError.style.color = 'red'
+    displayError.textContent = event.error.message;
+  } else {
+    displayError.textContent = '';
+  }
+}
+
+function createSubscription({paymentMethodId, priceId }) {
+  return (
+  	$.ajax({
+  		url: '/subscriptions/create_subscription',
+  		method: 'post',
+  		data: {
+	      payment_method: paymentMethodId,
+      	product: 'prod_HkPwPXN8ZYJufw',
+        price_id: '<%= params[:id]%>'
+  		}
+  	})
+  .then((response) => {
+    return response;
+  })
+  .then((result) => {
+    if (result.error) {
+      throw result;
+    }
+    return result;
+  })
+  .then((result) => {
+    return {subscription: result.subscription, paymentMethodId: result.payment_intent.payment_method, paymentIntent: result.payment_intent};
+  })
+  .then(handlePaymentThatRequiresCustomerAction)
+  .then(handleRequiresPaymentMethod)
+  .then(onSubscriptionComplete)
+  .catch((error) => {
+    displayError(error);
+  })
+)}
+
+function handlePaymentThatRequiresCustomerAction({subscription, paymentIntent, isRetry, invoice, priceId, paymentMethodId}) {
+  
+  if (subscription && subscription.status === 'active') {
+    return { subscription, priceId, paymentMethodId };
+  }
+  if ((paymentIntent && paymentIntent.status === 'requires_action') || (isRetry === true && paymentIntent.status ==='requires_payment_method') ) {
+    $('.submit_btn').prop('disable', true);
+    return stripe
+    .confirmCardPayment(paymentIntent.client_secret, {
+      payment_method: paymentMethodId,
+    })
+    .then((result) => {
+      if (result.error) {
+        return {
+          subscription, 
+          paymentMethodId: result.error.payment_method.id, 
+          priceId: '<%= params[:id]%>', 
+          paymentIntent: result.error.payment_intent
+        }
+      } else {
+        if (result.paymentIntent.status === 'succeeded') {
+          return {
+            subscription: subscription,
+            priceId: '<%= params[:id]%>',
+            paymentMethodId: paymentMethodId,
+          };
+        }
+      }
+    });
+  } 
+  else {
+    return { subscription, priceId, paymentMethodId };
+  }
+}
+
+
+function retryInvoiceWithNewPaymentMethod({ paymentMethodId, invoiceId, priceId, }) {
+  return (
+    $.ajax({
+      method: 'post',
+      url: '/subscriptions/retry_invoice',
+      data: {
+        payment_method: paymentMethodId,
+        invoice_id: invoiceId
+      }
+    })
+    .then((response) => {
+      return response;
+    })
+    .then((result) => {
+      if (result.error) {
+        throw result;
+      }
+      return result;
+    })
+    .then((result) => {
+      return {
+        invoice: result.invoice,
+        subscription: result.invoice.subscription,
+        paymentIntent: result.invoice.payment_intent,
+        paymentMethodId: paymentMethodId,
+        priceId: priceId,
+        isRetry: true,
+      };
+    })
+    .then(handlePaymentThatRequiresCustomerAction)
+    .then(handleRequiresPaymentMethod)
+    .then(onSubscriptionComplete)
+    .catch((error) => {
+      displayError(error);
+    })
+  );
+}
+
+function handleRequiresPaymentMethod({ subscription, paymentMethodId, priceId, paymentIntent }) {
+  if (subscription && subscription.status === 'active') {
+    return { subscription, priceId, paymentMethodId };
+  } else if ( paymentIntent && paymentIntent.status ==='requires_payment_method' ) {
+    localStorage.setItem('latestInvoiceId', subscription.latest_invoice);
+    localStorage.setItem('latestInvoicePaymentIntentStatus', paymentIntent.status );
+    throw { error: { message: 'Your card was declined.' } };
+  } else {
+    return { subscription, priceId, paymentMethodId };
+  }
+}
+
+function onSubscriptionComplete(result) {
+  console.log(result);
+  clearCache();
+  location.reload();
+  alert('Subscription Created successfully.')
+}
+
+function clearCache() {
+  localStorage.clear();
+}
+</script>

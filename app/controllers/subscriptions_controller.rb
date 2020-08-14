@@ -1,7 +1,9 @@
 class SubscriptionsController < ApplicationController
 	protect_from_forgery unless: -> { request.format.json? }
+
 	def index
-		
+		@customer = Stripe::Customer.retrieve(current_user.customer_id)
+		@subscriptions = @customer.subscriptions if @customer.present?
 	end
 	def show
 		@cards = current_user.user_cards.order(created_at: :desc)
@@ -47,5 +49,38 @@ class SubscriptionsController < ApplicationController
 		# if error == false
 			render json: {subscription: subscription, payment_intent: payment_intent}
 		# end
+	end
+
+
+	def subscriptions_new		
+		@customer = Stripe::Customer.retrieve(current_user.customer_id)
+		if @customer.present? && @customer.subscriptions.present? 
+			redirect_to subscriptions_path and return
+		else
+			@prices = Stripe::Price.list(product: 'prod_HoUUEvlnsVe9c5');
+		end
+	end
+	def payment_method
+		@price_id = params[:price_id]
+
+		respond_to do |format|
+			format.js { render '/subscriptions/js/payment_method' }
+		end
+	end
+
+	def upcoming_invoice
+		debugger
+		subscription = Stripe::Subscription.retrieve(params[:id])
+		next_invoice = Stripe::Invoice.upcoming(customer: current_user.customer_id, subscription: params[:id], subscription_items: [{ id: subscription.items.data[0].id, deleted: true }, { price: 'price_1HErVyDvcWFPSGRTnC5KsGQ7', deleted: false } ])
+	end
+
+	def destroy
+		begin
+			subscription = Stripe::Subscription.update(params[:id], cancel_at_period_end: true)
+		rescue Exception => e
+			puts e
+		end
+		flash[:notice] = 'Plan successfully canceled.'
+		redirect_to subscriptions_new_subscriptions_path
 	end
 end

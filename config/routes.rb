@@ -22,9 +22,13 @@ Rails.application.routes.draw do
       post  'create_subscription'   => 'subscriptions#create_subscription'
       post  'retry_invoice'         => 'subscriptions#retry_invoice'
 
-      get   'plans'                 => 'subscriptions#plans'
       get   'active'   => 'subscriptions#active_subscription'
+
+      get   'subscriptions_new'     => 'subscriptions#subscriptions_new'
+      get   'payment_method'        => 'subscriptions#payment_method'
     end
+    
+    resources :plans
   end
 
   post '/webhook/payment_attempt' 		=> 		'users#payment_attempt'

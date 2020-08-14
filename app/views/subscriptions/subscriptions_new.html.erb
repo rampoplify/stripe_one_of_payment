@@ -1,0 +1,93 @@
+<style type="text/css">
+.payment_method {
+  display: none;
+}
+</style>
+  <div class="container">
+    <h3 class="text-center">Create Subscription</h3>
+    <div class="select_price">
+      <%= render partial: 'layouts/partials/plan' %>
+      <div class="row">
+        <div class="col-sm-4 col-md-4 col-xs-12 col-lg-4 offset-sm-4 offset-md-4 offset-lg-4 proceed_btn button_align">
+          <button class="select_subscription">Proceed</button>
+        </div>
+      </div>
+    </div>
+    <div class="payment_method">
+      <form id="payment-form" >
+        <div class="col-sm-4 col-md-4 col-xs-12 col-lg-4 offset-sm-4 offset-md-4 offset-lg-4">
+          <label for="card-element">Card</label>
+          <div id="card-element"></div>
+        </div>
+        <div id="card-element-errors" class="text-gray-700 text-base mt-2" role="alert">
+          
+        </div>
+        <div>
+          <button id="submit-premium" type="submit" >Subscribe</button>
+        </div>
+      </form>
+    </div>
+  </div>
+<script type="text/javascript">
+  var style = {
+    base: {
+      fontSize: '16px',
+      color: '#32325d',
+      fontFamily:
+        '-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
+      fontSmoothing: 'antialiased',
+      '::placeholder': {
+        color: '#a0aec0',
+      },
+    },
+  };
+  var stripe = Stripe('pk_test_89Htth7vCl9UauQfC2i2KBgw00L63svyYN');
+  var elements = stripe.elements();
+
+  card = elements.create('card', {style: style});
+  card.mount('#card-element');
+
+  document.querySelector('form').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const latestInvoicePaymentIntentStatus = localStorage.getItem('latestInvoicePaymentIntentStatus');
+    if(latestInvoicePaymentIntentStatus === 'requires_payment_method') {
+      const invoiceId = localStorage.getItem('latestInvoiceId');
+      createPaymentMethod({ isPaymentRetry: true, invoiceId: invoiceId, cardElement: card })
+    }else{
+      createPaymentMethod({ isPaymentRetry: false, invoiceId: '', cardElement: card });
+    }
+  });
+
+  $('.select_card').on('click', function(){
+    const paymentMethodId = $(this).attr('id');
+    const latestInvoicePaymentIntentStatus = localStorage.getItem('latestInvoicePaymentIntentStatus');
+    if(latestInvoicePaymentIntentStatus === 'requires_payment_method') {
+      const invoiceId = localStorage.getItem('latestInvoiceId');
+        retryInvoiceWithNewPaymentMethod({
+          paymentMethodId: paymentMethodId,
+          invoiceId: invoiceId,
+          priceId: $("input[name='subscription']:checked").val(),
+        });
+    }else{
+      createSubscription({paymentMethodId})
+    }
+  })
+</script>
+<script type="text/javascript">
+  $('.select_subscription').on('click', function(){
+    if ($("input[name='subscription']:checked").length != 0){
+      $('.select_price').css({'opacity': 0.5, 'pointer-events': 'none'});
+      $('.payment_method').css('display', 'block')
+    }else{
+      alert('please select plan first.')
+      return false;
+    }
+  })
+  function onSubscriptionComplete(result) {
+    console.log(result);
+    clearCache();
+    location.reload();
+    alert('Subscription Created successfully.')
+  }
+</script>

@@ -1,0 +1,12 @@
+<div>
+	<% if @upcoming_invoice.present? %>
+	<ul>
+		<li>Email: <%= @upcoming_invoice.customer_email %> </li>
+		<li>Amount: $<%= @upcoming_invoice.amount_remaining / 100 %> </li>
+		<li>Next Invoice Date: <%= Time.at(@upcoming_invoice.next_payment_attempt).strftime('%d/%m/%Y') %> </li>
+		<li>Description: <%= @upcoming_invoice.lines.data[0].description%> </li>
+	</ul>
+	<% else %>
+	<span>No upcoming invoice for you.</span>
+	<% end %>
+</div>

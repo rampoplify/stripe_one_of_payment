@@ -1,0 +1,39 @@
+    <div class="select_price">
+      <div class="row">
+        <%if @prices.present? %>
+          <% @prices.each do |price|%>
+            <div class="col-sm-4 col-md-4 col-xs-12 col-lg-4" style="<% if @current_plan.present? && price.id == @current_plan.id%>opacity: 0.3; pointer-events: none; <% end %>" >
+              <label for="card" class="method_card">
+                <% if price.recurring.interval == 'month' && price.recurring.interval_count == 1 %>
+                  <% charge = 'Monthly'%>
+                <% elsif price.recurring.interval == 'month' && price.recurring.interval_count == 6 %>
+                  <% charge =  'Per 6 Month'%> 
+                <% else %>
+                  <% charge =  'Per year'%> 
+                <% end %>
+
+                <div class="radio-input">
+                  <input id="<%= price.id%>" type="radio" name="subscription" class="radio_buttons" value="<%= price.id%>">
+                  <ul>
+                    <li>
+                      Amount : $ <%= price.unit_amount / 100 %> / <%= charge %>
+                    </li>
+                    <li>
+                      Charged <%= charge%> 
+                   </li>
+                   <li>
+                      Non-refundable
+                   </li>
+                 </ul>
+                </div>
+              </label>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+      <div class="row">
+        <div class="col-sm-4 col-md-4 col-xs-12 col-lg-4 offset-sm-4 offset-md-4 offset-lg-4 proceed_btn button_align">
+          <button class="select_subscription">Proceed</button>
+        </div>
+      </div>
+    </div>

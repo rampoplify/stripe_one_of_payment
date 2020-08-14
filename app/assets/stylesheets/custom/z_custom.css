@@ -619,3 +619,13 @@ button a::hover {
   opacity: 0.5;
   pointer-events: none;
 }
+.method_card {
+  padding-top: 20px;
+  cursor: pointer;
+  background-color: rgb(249, 249, 249);
+  align-items: center;
+  background-color: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.125);
+  border-radius: 0.25rem;
+  width: 100%
+}
