@@ -28,7 +28,11 @@ Rails.application.routes.draw do
       get   'payment_method'        => 'subscriptions#payment_method'
     end
     
-    resources :plans
+    resources :plans do 
+      member do
+        get   'incoming_invoice'
+      end
+    end
   end
 
   post '/webhook/payment_attempt' 		=> 		'users#payment_attempt'

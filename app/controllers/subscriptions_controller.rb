@@ -36,26 +36,30 @@ class SubscriptionsController < ApplicationController
 
 	def create_subscription
 		begin
-			customer_payment_method = Stripe::PaymentMethod.attach(params[:payment_method], {customer: current_user.customer_id})
-			customer_default_payment_method = Stripe::Customer.update( current_user.customer_id, invoice_settings: { default_payment_method: params[:payment_method] })
-			subscription = Stripe::Subscription.create({ customer: current_user.customer_id, items: [{price: params[:price_id]}]}, payment_method: params[:payment_method] )
-			# subscription = Stripe::Subscription.create({ customer: current_user.customer_id, items: [{price: params[:price_id]}], expand: %w[latest_invoice.payment_intent]}, payment_method: params[:payment_method] )
-			latest_invoice = Stripe::Invoice.retrieve(subscription.latest_invoice)
-			payment_intent = Stripe::PaymentIntent.retrieve(latest_invoice.payment_intent)
-			# error = false
+			@customer = Stripe::Customer.retrieve(current_user.customer_id)
+			debugger
+			if @customer.present? && @customer.subscriptions.present? 
+				flash[:notice] = 'This customer have already active plan.'
+				redirect_to root_path and return
+			else
+				customer_payment_method = Stripe::PaymentMethod.attach(params[:payment_method], {customer: current_user.customer_id})
+				customer_default_payment_method = Stripe::Customer.update( current_user.customer_id, invoice_settings: { default_payment_method: params[:payment_method] })
+				subscription = Stripe::Subscription.create({ customer: current_user.customer_id, items: [{price: params[:price_id]}]}, payment_method: params[:payment_method] )
+				# subscription = Stripe::Subscription.create({ customer: current_user.customer_id, items: [{price: params[:price_id]}], expand: %w[latest_invoice.payment_intent]}, payment_method: params[:payment_method] )
+				latest_invoice = Stripe::Invoice.retrieve(subscription.latest_invoice)
+				payment_intent = Stripe::PaymentIntent.retrieve(latest_invoice.payment_intent)
+			end
 		rescue Exception => e
 			flash[:notice] = 'This is not available'
 		end
-		# if error == false
-			render json: {subscription: subscription, payment_intent: payment_intent}
-		# end
+		render json: {subscription: subscription, payment_intent: payment_intent}
 	end
 
 
 	def subscriptions_new		
 		@customer = Stripe::Customer.retrieve(current_user.customer_id)
 		if @customer.present? && @customer.subscriptions.present? 
-			redirect_to subscriptions_path and return
+			redirect_to subscription_plans_path(@customer.subscriptions.data[0].id) and return
 		else
 			@prices = Stripe::Price.list(product: 'prod_HoUUEvlnsVe9c5');
 		end
@@ -66,12 +70,6 @@ class SubscriptionsController < ApplicationController
 		respond_to do |format|
 			format.js { render '/subscriptions/js/payment_method' }
 		end
-	end
-
-	def upcoming_invoice
-		debugger
-		subscription = Stripe::Subscription.retrieve(params[:id])
-		next_invoice = Stripe::Invoice.upcoming(customer: current_user.customer_id, subscription: params[:id], subscription_items: [{ id: subscription.items.data[0].id, deleted: true }, { price: 'price_1HErVyDvcWFPSGRTnC5KsGQ7', deleted: false } ])
 	end
 
 	def destroy

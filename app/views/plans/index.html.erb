@@ -2,8 +2,33 @@
 .payment_method {
   display: none;
 }
+.disabled_button {
+  opacity: 0.5;
+  pointer-events: none;
+}
 </style>
 <div class="container">
+  <div class="row">
+    <div class="col-sm-4 col-md-4 col-lg-4 col-xs-4 col-xl-4 offset-sm-4 offset-md-4 offset-lg-4 mb-3">
+      <button class="<% if !@upcoming_invoice.present? %> disabled_button <% end %> cancel_plan" >
+        <%= link_to 'Cancel Plan', "/subscriptions/#{@subscription_id}", method: :delete %>
+      </button>
+    </div>
+    <div class="col-sm-4 col-md-4 col-lg-4 col-xs-4 col-xl-4 offset-sm-4 offset-md-4 offset-lg-4 mb-3">
+      <% if @upcoming_invoice.present? %>
+      <span>Upcomming invoice</span>
+        <ul>
+          <li>Email: <%= @upcoming_invoice.customer_email %> </li>
+          <li>Amount: $<%= @upcoming_invoice.amount_remaining / 100 %> </li>
+          <li>Next Invoice Date: <%= Time.at(@upcoming_invoice.next_payment_attempt).strftime('%d/%m/%Y') %> </li>
+          <li>Description: <%= @upcoming_invoice.lines.data[0].description%> </li>
+        </ul>
+        <% else %>
+        <span>No upcoming invoice for you.</span>
+      <% end %>
+    </div>
+  </div>
+  <hr />
   <h3 class="text-center">Update Plan</h3>
   <div class="select_price">
     <%= render partial: 'layouts/partials/plan' %>
@@ -26,6 +51,20 @@
         <button id="submit-premium" type="submit" >Pay with new card</button>
       </div>
     </form>
+  </div>
+</div>
+
+<div class="modal" tabindex="-1" role="dialog" id="amount_to_be_paid">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-body">
+        <p></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="pay_now_modal_button">Pay</button>
+        <button type="button" class="btn btn-secondary" id="cancel_update">Cancel</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -78,9 +117,14 @@
 </script>
 
 <script type="text/javascript">
-  $('.select_plan').on('click', function(){
-    let subscription = "<%= params[:subscription_id] %>";
-    let plan = $("input[name='subscription']:checked").val();
+  function changePlan(subscription, plan){
+    if ($("input[name='subscription']:checked").length == 0){
+      alert('please select plan first.')
+      return false
+    }
+    // let subscription = "<%= params[:subscription_id] %>";
+    // let plan = $("input[name='subscription']:checked").val();
+    // $('.select_price').css('opacity', 0.5);
     $.ajax({
       url: "/subscriptions/"+subscription+"/plans/"+plan,
       method: 'put',
@@ -112,7 +156,7 @@
     .catch((error) => {
       displayError(error);
     })
-  })
+  }
 
   function onSubscriptionComplete(result) {
     clearCache();
@@ -122,4 +166,37 @@
   function clearCache() {
   localStorage.clear();
 }
+</script>
+<script type="text/javascript">
+  $('.select_plan').on('click', function(){
+    if ($("input[name='subscription']:checked").length == 0){
+      alert('please select plan first.')
+      return false
+    }
+    let subscription = "<%= params[:subscription_id] %>";
+    let plan = $("input[name='subscription']:checked").val();
+    $('.select_price').css('opacity', 0.5);
+    $.ajax({
+      url: "/subscriptions/"+subscription+"/plans/"+plan+"/incoming_invoice",
+      method: 'get',
+      data: {}, 
+      success: function(result){
+        $('.modal-body').html("<p>" + result.next_invoice.amount_remaining / 100 +  " to be deducted from your account.</p>")
+        $('#amount_to_be_paid').show();
+      },
+      error: function(error){
+
+      }
+    })
+  })
+  $('#pay_now_modal_button').on('click', function(){
+    let subscription = "<%= params[:subscription_id] %>";
+    let plan = $("input[name='subscription']:checked").val();
+    changePlan(subscription, plan)
+    $('#amount_to_be_paid').hide();
+    $('.cancel_plan').css({'opacity': 0.5, 'pointer-events': 'none'})
+  })
+  $('#cancel_update').on('click', function(){
+    location.reload();
+  })
 </script>

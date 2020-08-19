@@ -50,6 +50,8 @@
   document.querySelector('form').addEventListener('submit', function(e) {
     e.preventDefault();
 
+    $('#submit-premium').prop('disabled', true)
+    $('.payment_method').css({'opacity': 0.5, 'pointer-events': 'none'})
     const latestInvoicePaymentIntentStatus = localStorage.getItem('latestInvoicePaymentIntentStatus');
     if(latestInvoicePaymentIntentStatus === 'requires_payment_method') {
       const invoiceId = localStorage.getItem('latestInvoiceId');
@@ -77,6 +79,7 @@
 <script type="text/javascript">
   $('.select_subscription').on('click', function(){
     if ($("input[name='subscription']:checked").length != 0){
+      $('.select_subscription').prop('disabled', true)
       $('.select_price').css({'opacity': 0.5, 'pointer-events': 'none'});
       $('.payment_method').css('display', 'block')
     }else{

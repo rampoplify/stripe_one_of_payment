@@ -44,6 +44,10 @@ function createPaymentMethod({ isPaymentRetry, invoiceId, cardElement }) {
   })
     .then((result) => {
       if (result.error) {
+        if($('#submit-premium').length != 0) {
+          $('#submit-premium').prop('disabled', false)
+          $('.payment_method').css({'opacity': 1, 'pointer-events': 'all'})
+        }
         displayError(result);
       } else {
         if (isPaymentRetry) {
@@ -91,7 +95,11 @@ function createSubscription({paymentMethodId, priceId }) {
     return result;
   })
   .then((result) => {
-    return {subscription: result.subscription, paymentMethodId: result.payment_intent.payment_method, paymentIntent: result.payment_intent};
+    if (result.subscription.status === 'active') {
+      onSubscriptionComplete({subscription: result.subscription})
+    }else{
+      return {subscription: result.subscription, paymentMethodId: result.payment_intent.payment_method, paymentIntent: result.payment_intent};
+    }
   })
   .then(handlePaymentThatRequiresCustomerAction)
   .then(handleRequiresPaymentMethod)
