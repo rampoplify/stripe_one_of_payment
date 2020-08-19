@@ -37,7 +37,6 @@ class SubscriptionsController < ApplicationController
 	def create_subscription
 		begin
 			@customer = Stripe::Customer.retrieve(current_user.customer_id)
-			debugger
 			if @customer.present? && @customer.subscriptions.present? 
 				flash[:notice] = 'This customer have already active plan.'
 				redirect_to root_path and return
@@ -47,7 +46,9 @@ class SubscriptionsController < ApplicationController
 				subscription = Stripe::Subscription.create({ customer: current_user.customer_id, items: [{price: params[:price_id]}]}, payment_method: params[:payment_method] )
 				# subscription = Stripe::Subscription.create({ customer: current_user.customer_id, items: [{price: params[:price_id]}], expand: %w[latest_invoice.payment_intent]}, payment_method: params[:payment_method] )
 				latest_invoice = Stripe::Invoice.retrieve(subscription.latest_invoice)
-				payment_intent = Stripe::PaymentIntent.retrieve(latest_invoice.payment_intent)
+				if latest_invoice.payment_intent.present?
+					payment_intent = Stripe::PaymentIntent.retrieve(latest_invoice.payment_intent)
+				end
 			end
 		rescue Exception => e
 			flash[:notice] = 'This is not available'
